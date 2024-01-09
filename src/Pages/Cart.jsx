@@ -42,6 +42,7 @@ function Cart() {
                     <th>#</th>
                     <th>Product</th>
                     <th>Image</th>
+                    <th>Quantity</th>
                     <th>Price</th>
                     <th>Action</th>
                   </tr>

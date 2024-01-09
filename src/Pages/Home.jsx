@@ -2,7 +2,11 @@ import React, { useEffect } from "react";
 import { Row, Col, Card, Button } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { fetchProducts } from "../Redux/Slices/productSlice";
+import {
+  fetchProducts,
+  onNavigateNext,
+  onNavigatePrev,
+} from "../Redux/Slices/productSlice";
 import Spinner from "react-bootstrap/Spinner";
 import { addToWishlist } from "../Redux/Slices/wishlistSlice";
 import { addtoCart } from "../Redux/Slices/cartSlice";
@@ -10,10 +14,14 @@ import Header from "../Components/Header";
 
 function Home() {
   const dispatch = useDispatch();
-  const { loading, products, error } = useSelector(
-    (state) => state.productSlice
-  );
+  const { loading, products, error, productsPerPage, currentPage } =
+    useSelector((state) => state.productSlice);
   const { wishlist } = useSelector((state) => state.wishlistSlice);
+
+  const totalPages = Math.ceil(products?.length / productsPerPage);
+  const indexOfLastItem = currentPage * productsPerPage;
+  const indexOfFirstItem = indexOfLastItem - productsPerPage;
+  const visibleCards = products?.slice(indexOfFirstItem, indexOfLastItem);
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -24,9 +32,21 @@ function Home() {
     else dispatch(addToWishlist(product));
   };
 
+  const navigatePrev = () => {
+    if (currentPage != 1) {
+      dispatch(onNavigatePrev());
+    }
+  };
+
+  const navigateNext = () => {
+    if (currentPage != totalPages) {
+      dispatch(onNavigateNext());
+    }
+  };
+
   return (
     <>
-      <Header insideHome/>
+      <Header insideHome />
       <div className="container mx-auto mt-1 ">
         {loading ? (
           <div className="d-flex justify-content-center my-2">
@@ -35,8 +55,8 @@ function Home() {
           </div>
         ) : (
           <Row className="mt-5 container">
-            {products.length > 0 ?
-              products.map((product, index) => (
+            {products.length > 0 ? (
+              visibleCards.map((product, index) => (
                 <Col key={index} className="mb-5" sm={12} md={6} lg={4} xl={3}>
                   <Card className="shadow rounded" style={{ width: "18rem" }}>
                     <Link to={`/view/${product.id}`}>
@@ -67,9 +87,26 @@ function Home() {
                     </Card.Body>
                   </Card>
                 </Col>
-              )): <div className="text-center text-danger my-3 ">
+              ))
+            ) : (
+              <div className="text-center text-danger my-3 ">
                 <h1 className="fw-bolder ">Product not found !</h1>
-                </div>}
+              </div>
+            )}
+            <div className="d-flex justify-content-center align-items-center fw-bolder mb-2 ">
+              <span onClick={navigatePrev} className="btn btn-link">
+                {" "}
+                <i className="fa-solid fa-angles-left text-dark fw-bolder"></i>{" "}
+              </span>
+              <span>
+                {" "}
+                {currentPage} of {totalPages}{" "}
+              </span>
+              <span onClick={navigateNext} className="btn btn-link">
+                {" "}
+                <i className="fa-solid fa-angles-right text-dark fw-bolder"></i>{" "}
+              </span>
+            </div>
           </Row>
         )}
       </div>
