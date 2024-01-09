@@ -28,12 +28,15 @@ const cartSlice =createSlice({
             existingProduct.totalPrice=existingProduct.quantity * existingProduct.price
             state=([...newState,existingProduct])
         },
-        decQuantity:(state,action)=>{
-            const existingProduct=state.find(item=>item.id==action.payload.id)
-            const newState =state.filter(item=>item.id!=existingProduct.id)
-            existingProduct.quantity--
-            existingProduct.totalPrice=existingProduct.quantity * existingProduct.price
-            state=([...newState,existingProduct])
+        decQuantity: (state, action) => {
+            const { id } = action.payload;
+        
+            return state.map(item => {
+                if (item.id === id && item.quantity > 0) {
+                    return { ...item, quantity: item.quantity - 1, totalPrice: item.totalPrice - item.price };
+                }
+                return item;
+            }).filter(item => item.quantity > 0);
         }
     }
 })
